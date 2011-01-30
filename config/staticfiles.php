@@ -17,7 +17,6 @@ return array(
     //(естественно он должен находиться на том же физическом сервере,
     // что и сам сайт)
     // например так: 
-//    'path'=>  'Z:/home/static/static/',
     'path' => realpath(DOCROOT),
     //сюда будут копироваться статические файлы если не требуется их сборка в билды
     'url' => '/!/static/',
@@ -33,8 +32,6 @@ return array(
      * 2) "http://ya.ru" - ссылки будут иметь вид: "http://ya.ru/pic.jpg"
      * 3) "http://ya.ru.nyud.net" - ссылки будут иметь вид: "http://ya.ru.nyud.net/pic.jpg"
      */
-    'host' => 'http://static.site.ru',
-//    'host' => '',
-//    'host' => 'http://'.$_SERVER['HTTP_HOST'],
+    'host' => 'http://'.$_SERVER['HTTP_HOST'],
 );
 ?>
