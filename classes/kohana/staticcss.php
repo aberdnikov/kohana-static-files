@@ -15,16 +15,18 @@ class Kohana_StaticCss extends StaticFile {
 	protected static $_instance;
 
 	/**
-	 * Внешние подключаемые файлы стилей
+	 * CSS files
+	 *
 	 * @var array
 	 */
-	protected $_css;
+	protected $_css = array();
+
 	/**
 	 * inline CSS
 	 *
 	 * @var string
 	 */
-	protected $_css_inline;
+	protected $_css_inline = array();
 
 	/**
 	 * Class instance initiating
@@ -43,19 +45,26 @@ class Kohana_StaticCss extends StaticFile {
 	}
 
 	/**
-	 * Добавление внешнего файла стилей
+	 * Adds real existing file (in docroot)
 	 *
-	 * @param string $css_inline
-	 * @param string $condition - условие подключения скрипта, например [IE7]
-	 * @return Css
+	 * @param  string      $css_file
+	 * @param  string|null $condition
+	 * @return Kohana_StaticCss
 	 */
-	function addCss($css_file, $condition = NULL)
+	public function addCss($css_file, $condition = NULL)
 	{
 		$this->_css[$css_file] = $condition;
 		return $this;
 	}
 
-	function addCssStatic($css_file, $condition = NULL)
+	/**
+	 * Adds external server css
+	 *
+	 * @param  string      $css_file
+	 * @param  string|null $condition
+	 * @return Kohana_StaticCss
+	 */
+	public function addCssStatic($css_file, $condition = NULL)
 	{
 		$css_file = $this->_config->url . $css_file;
 		$this->_css[$css_file] = $condition;
@@ -63,21 +72,21 @@ class Kohana_StaticCss extends StaticFile {
 	}
 
 	/**
-	 * Добавление inline CSS
+	 * Adds inline style
 	 *
-	 * @param string $css_inline
-	 * @return Css
+	 * @param  string  $css_inline
+	 * @return Kohana_StaticCss
 	 */
-	function addCssInline($css_inline)
+	public function addCssInline($css_inline)
 	{
 		$css_inline = str_replace('{staticfiles_url}', STATICFILES_URL, $css_inline);
 		$this->_css_inline[$css_inline] = $css_inline;
-		return $this;
 	}
 
 	/**
-	 * Сжатие файла стилей
-	 * @param string $v
+	 * Minifies css file content
+	 *
+	 * @param  string $v
 	 * @return string
 	 */
 	protected function minify($v)
@@ -99,15 +108,19 @@ class Kohana_StaticCss extends StaticFile {
 	 * Препарируем CSS
 	 * пожмем, исправим пути к картинкам
 	 */
+
+	/**
+	 * Prepares css file content
+	 *
+	 * If you want to move static files folder (ie images), you should use a placeholder instead of strict
+	 * folder defining.
+	 * @examle a:hover{background:url({staticfiles_url}dir/file.jpeg) no-repeat left top;}
+	 *
+	 * @param  string $style
+	 * @return string
+	 */
 	protected function prepareCss($style)
 	{
-		/**
-		 * каждый файл стилей должен содержать плейсхолдеры для замены,
-		 * чтобы мы могли иметь возможность передвигать папку со статикой
-		 * от проекта к проекту по своему желанию
-		 * Пример:
-		 * a:hover{background:url({staticfiles_url}dir/file.jpeg) no-repeat left top;}
-		 */
 		$style = str_replace('{staticfiles_url}', STATICFILES_URL, $style);
 
 		if ($this->_config->css['min'])
@@ -118,7 +131,14 @@ class Kohana_StaticCss extends StaticFile {
 		return trim($style);
 	}
 
-	protected function getLink($css, $condition = NULL)
+	/**
+	 * Gets html code of the css loading
+	 *
+	 * @param  string      $css
+	 * @param  string|null $condition
+	 * @return string
+	 */
+	public function getLink($css, $condition = NULL)
 	{
 		$css = trim($css, '/');
 		if (mb_substr($css, 0, 4) != 'http')
@@ -126,17 +146,18 @@ class Kohana_StaticCss extends StaticFile {
 			$css = $this->_config->host . $css;
 		}
 
-		return '        '
+		return ' '
 		. ($condition ? '<!--[' . $condition . ']>' : '')
 		. HTML::style($css, array('media' => 'all'))
 		. ($condition ? '<![endif]-->' : '');
 	}
 
 	/**
-	 * Внешние стили
-	 * @return string
+	 * Gets external css
+	 *
+	 * @return null|string
 	 */
-	function getCss()
+	public function getCss()
 	{
 		$benchmark = Profiler::start(__CLASS__, __FUNCTION__);
 
@@ -147,7 +168,7 @@ class Kohana_StaticCss extends StaticFile {
 		}
 
 		$css_code = '';
-		/* если не надо собирать файлы в один */
+		// Not need to build one js file
 		if ( ! $this->_config->css['build'])
 		{
 			foreach ($this->_css as $css => $condition)
@@ -169,7 +190,7 @@ class Kohana_StaticCss extends StaticFile {
 				$build_name = $this->makeFileName($css, $condition, 'css');
 				if ( ! file_exists($this->cache_file($build_name)))
 				{
-					//соберем билд в первый раз
+					 // first time building
 					$build = '';
 					foreach ($css as $url)
 					{
@@ -190,10 +211,11 @@ class Kohana_StaticCss extends StaticFile {
 	}
 
 	/**
-	 * Формирование инлайновых стилей
-	 * @return <type>
+	 * Gets inline styles
+	 *
+	 * @return null|string
 	 */
-	function getCssInline()
+	public function getCssInline()
 	{
 		$benchmark = Profiler::start(__CLASS__, __FUNCTION__);
 
@@ -224,11 +246,12 @@ class Kohana_StaticCss extends StaticFile {
 	}
 
 	/**
-	 * Формирование обоих списков (внешние и инлайн стили)
+	 * Gets all css and inline styles that was loaded earlier
 	 * @return string
 	 */
-	function getCssAll()
+	public function getCssAll()
 	{
 		return $this->getCss() . "\n" . $this->getCssInline();
 	}
-}
+
+} // END Kohana_StaticCss

@@ -8,7 +8,15 @@
 class Kohana_StaticJs extends StaticFile {
 
 	/**
-	 * External scripts
+	 * Class instance
+	 *
+	 * @static
+	 * @var StaticJs
+	 */
+	protected static $_instance;
+
+	/**
+	 * Javascript files
 	 * @var array
 	 */
 	protected $_js = array();
@@ -25,14 +33,11 @@ class Kohana_StaticJs extends StaticFile {
 	 */
 	protected $_js_onload = array();
 
-
 	/**
-	 * Class instance
-	 * @static
-	 * @var $instance
+	 * StaticFiles config object
+	 *
+	 * @var Kohana_Config
 	 */
-	protected static $_instance;
-
 	protected $_config;
 
 	/**
@@ -51,45 +56,45 @@ class Kohana_StaticJs extends StaticFile {
 		return self::$_instance;
 	}
 
-	public function __construct()
-	{
-		$this->_config = Kohana::config('staticfiles');
-	}
-
 	/**
 	 * Adds real existing file (in docroot)
 	 *
 	 * @param  string      $js
 	 * @param  string|null $condition
-	 * @return void
+	 * @return StaticJs
 	 */
 	public function addJs($js, $condition = NULL)
 	{
 		$this->_js[$js] = $condition;
+		return $this;
 	}
 
 	/**
-	 * Подключение внешнего скрипта, по технологии "static-files"
-	 * т.е. без учета префикса из конфига
-	 * @param string $js
+	 * Adds external server script
+	 *
+	 * @param  string      $js
+	 * @param  string|null $condition
+	 * @return StaticJs
 	 */
 	public function addJsStatic($js, $condition = NULL)
 	{
 		$js = $this->_config->url . $js;
 		$this->_js[$js] = $condition;
+		return $this;
 	}
 
 	/**
-	 * Добавление куска инлайн джаваскрипта
-	 * @param <type> $js
-	 * @param mixed $id - уникальный флаг куска кода, чтобы можно
-	 * было добавлять в цикле и не бояться дублей
+	 * Adds inline javascript code
+	 *
+	 * @param  string      $js
+	 * @param  string|null $id to avoid infinite loops (?)
+	 * @return void
 	 */
 	public function addJsInline($js, $id = NULL)
 	{
 		$js = str_replace('{static_url}', STATICFILES_URL, $js);
 
-		if ($id)
+		if ($id !== NULL)
 		{
 			$this->_js_inline[$id] = $js;
 		}
@@ -100,10 +105,11 @@ class Kohana_StaticJs extends StaticFile {
 	}
 
 	/**
-	 * Добавление кода, который должен выполниться при загрузке страницы
-	 * @param string $js
-	 * @param mixed $id - уникальный флаг куска кода, чтобы можно
-	 * было добавлять в цикле и не бояться дублей
+	 * Adds on page load javascript
+	 *
+	 * @param  string      $js
+	 * @param  string|null $id
+	 * @return StaticJs
 	 */
 	public function addJsOnload($js, $id = NULL)
 	{
@@ -121,7 +127,7 @@ class Kohana_StaticJs extends StaticFile {
 	}
 
 	/**
-	 * Использовать во View для вставки вызова всех скриптов
+	 * Gets all javascripts that was loaded earlier
 	 * @return string
 	 */
 	public function getJsAll()
@@ -129,6 +135,13 @@ class Kohana_StaticJs extends StaticFile {
 		return $this->getJs() . "\n" . $this->getJsInline() . "\n" . $this->getJsOnload();
 	}
 
+	/**
+	 * Gets html code of the script loading
+	 *
+	 * @param  string $js
+	 * @param  script|null $condition
+	 * @return string
+	 */
 	public function getLink($js, $condition = NULL)
 	{
 		$js = trim($js, '/');
@@ -137,7 +150,7 @@ class Kohana_StaticJs extends StaticFile {
 			$js = $this->_config->host . $js;
 		}
 
-		return '        '
+		return ' '
 		. ($condition ? '<!--[' . $condition . ']>' : '')
 		. HTML::script($js)
 		. ($condition ? '<![endif]-->' : '') . "\n";
@@ -171,7 +184,6 @@ class Kohana_StaticJs extends StaticFile {
 		else
 		{
 			$build = array();
-            $js_code = '';
             foreach ($this->_js as $js => $condition)
             {
                 $build[$condition][] = $js;
@@ -184,14 +196,13 @@ class Kohana_StaticJs extends StaticFile {
 
                 if ( ! file_exists($this->cache_file($build_name)))
                 {
-                    //соберем билд в первый раз
+                    // first time building
                     $build = '';
                     foreach ($js as $url)
                     {
                         $_js = $this->getSource($url);
 
-                        //если надо сжимать и он еще не сжат
-                        //(общепринятое соглашение: у всех сжатых файлов есть в имени ".min.")
+	                    // look if file name has 'min' suffix to avoid extra minification
                         if ($this->_config->js['min'] AND ! mb_strpos($url, '.min.'))
                         {
                             $_js = JSMin::minify($_js);
@@ -212,12 +223,14 @@ class Kohana_StaticJs extends StaticFile {
 	}
 
 	/**
-	 * Только инлайн
-	 * @return <type>
+	 * Gets inline scripts
+	 *
+	 * @return null|string
 	 */
 	public function getJsInline()
 	{
 		$benchmark = Profiler::start(__CLASS__, __FUNCTION__);
+
 		if ( ! count($this->_js_inline))
 		{
 			Profiler::stop($benchmark);
@@ -227,7 +240,7 @@ class Kohana_StaticJs extends StaticFile {
 		$js_code = '';
 		foreach ($this->_js_inline as $js)
 		{
-			if (Kohana::config('staticfiles.js.min'))
+			if ($this->_config->js['min'])
 			{
 				$js = JSMin::minify($js);
 			}
@@ -236,12 +249,12 @@ class Kohana_StaticJs extends StaticFile {
 
 		$js_code = $this->prepare($js_code);
 
-		if ( ! Kohana::config('staticfiles.js.build'))
+		if ( ! $this->_config->js['build'])
 		{
 			return '<script language="JavaScript" type="text/javascript">' . trim($js_code) . '</script>';
 		}
 
-		//если требуется собирать инлайн скрипты в один внешний файл
+		// If one file building of inline scripts is needed
 		$build_name = $this->makeFileName($this->_js_inline, 'inline', 'js');
 		if ( ! file_exists($this->cache_file($build_name)))
 		{
@@ -252,14 +265,21 @@ class Kohana_StaticJs extends StaticFile {
 		return $this->getLink($this->cache_url($build_name));
 	}
 
+	/**
+	 * Prepares javascript code
+	 *
+	 * @param  string $js_code
+	 * @return mixed
+	 */
 	public function prepare($js_code)
 	{
 		return str_replace('{staticfiles_url}', STATICFILES_URL, $js_code);
 	}
 
 	/**
-	 * Только онлоад
-	 * @return <type>
+	 * Gets javascript code that must be loaded on page load
+	 *
+	 * @return null|string
 	 */
 	public function getJsOnload()
 	{
@@ -267,30 +287,37 @@ class Kohana_StaticJs extends StaticFile {
 			return NULL;
 
 		$js = implode("\n", $this->_js_onload);
-		if (Kohana::config('staticfiles.js.min'))
+		if ($this->_config->js['min'])
 		{
 			$js = JSMin::minify($js);
 		}
 
 		$js = $this->prepare($js);
-		if ( ! Kohana::config('staticfiles.js.build'))
+		if ( ! $this->_config->js['build'])
 		{
 			return '<script language="JavaScript" type="text/javascript">' . "\n\t" . 'jQuery(document).ready(' . "\n\t\t" .
 			'function(){' . "\n\t\t\t" . trim(str_replace("\n", "\n\t\t\t", $js)) . "\n\t\t" . '}' . "\n\t" . ');' . "\n" . '</script>';
 		}
 
-		//если требуется собирать инлайн скрипты в один внешний файл
+		// If one file building of inline scripts is needed
 		$build_name = $this->makeFileName($this->_js_onload, 'onload', 'js');
-		if ( ! file_exists(Controller_Staticfiles::cache_file($build_name)))
+		if ( ! file_exists($this->cache_file($build_name)))
 		{
-			$this->save(Controller_Staticfiles::cache_file($build_name), $js);
+			$this->save($this->cache_file($build_name), $js);
 		}
 
-		return $this->getLink(Controller_Staticfiles::cache_url($build_name));
+		return $this->getLink($this->cache_url($build_name));
 	}
 
+	/**
+	 * Adds common libraries (for now it works only to jquery)
+	 *
+	 * @todo Make common method to load most popular frameworks and libraries
+	 * @return void
+	 */
 	public function needJquery()
 	{
 		$this->addJs('https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js');
 	}
-}
+
+} // END Kohana_StaticJs

@@ -32,5 +32,5 @@ return array(
      * 2) "http://ya.ru" - ссылки будут иметь вид: "http://ya.ru/pic.jpg"
      * 3) "http://ya.ru.nyud.net" - ссылки будут иметь вид: "http://ya.ru.nyud.net/pic.jpg"
      */
-    'host' => 'http://'.$_SERVER['HTTP_HOST'],
+    'host' => URL::base(FALSE, TRUE),
 );

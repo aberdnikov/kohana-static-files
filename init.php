@@ -9,4 +9,5 @@ Route::set(
 	'action' => 'index'
 	));
 
+require_once Kohana::find_file('vendor', 'jsmin');
 define('STATICFILES_URL', Kohana::config('staticfiles.host').Kohana::config('staticfiles.url'));
