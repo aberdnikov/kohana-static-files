@@ -1,4 +1,4 @@
-<?php
+<?php defined('SYSPATH') or die('No direct access allowed.');
 /**
  * jsmin.php - PHP implementation of Douglas Crockford's JSMin.
  *
