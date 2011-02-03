@@ -6,6 +6,9 @@
  * при развертывании проекта не забывать копировать их куда надо
  * Просто бросаем модуль в modules, прописываем его в bootstrapper
  * Затем текущий контроллер, при первом же запросе
+ *
+ * @package Kohana-static-files
+ * @author Berdnikov Alexey <aberdnikov@gmail.com>
  */
 abstract class Controller_Staticfiles extends Controller {
 

@@ -1,23 +1,23 @@
-<?php
+<?php defined('SYSPATH') or die('No direct script access.');
 
 return array(
     'js' => array(
         //минимизация скриптов
-        'min' => true,
+        'min' => TRUE,
         //сборка в один файл по типу (external, inline, onload)
-        'build' => true,
+        'build' => TRUE,
     ),
     'css' => array(
         //минимизация стилей
-        'min' => true,
+        'min' => TRUE,
         //сборка в один файл по типу (external, inline)
-        'build' => true,
+        'build' => TRUE,
     ),
     //полный путь до DOCUMENT_ROOT домена со статикой
     //(естественно он должен находиться на том же физическом сервере,
     // что и сам сайт)
-    // например так: 
-    'path' => realpath(DOCROOT),
+    // например так:
+    'path' => realpath(DOCROOT) . DIRECTORY_SEPARATOR,
     //сюда будут копироваться статические файлы если не требуется их сборка в билды
     'url' => '/!/static/',
     //сюда будут складываться сгенерированные скрипты и файлы стилей
@@ -34,4 +34,3 @@ return array(
      */
     'host' => 'http://'.$_SERVER['HTTP_HOST'],
 );
-?>

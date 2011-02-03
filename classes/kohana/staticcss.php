@@ -1,5 +1,10 @@
 <?php defined('SYSPATH') or die('No direct access allowed.');
 
+/**
+ * @uses JSMin
+ * @package Kohana-static-files
+ * @author Berdnikov Alexey <aberdnikov@gmail.com>
+ */
 class Kohana_StaticCss extends StaticFile {
 
 	/**
