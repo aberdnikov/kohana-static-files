@@ -146,8 +146,8 @@ class Kohana_StaticCss extends StaticFile {
 			$css = $this->_config->host . $css;
 		}
 
-		return ' '
-		. ($condition ? '<!--[' . $condition . ']>' : '')
+		return ''
+		. ($condition ? '<!--[if ' . $condition . ']>' : '')
 		. HTML::style($css, array('media' => 'all'))
 		. ($condition ? '<![endif]-->' : '');
 	}

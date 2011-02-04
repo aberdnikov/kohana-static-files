@@ -150,8 +150,8 @@ class Kohana_StaticJs extends StaticFile {
 			$js = $this->_config->host . $js;
 		}
 
-		return ' '
-		. ($condition ? '<!--[' . $condition . ']>' : '')
+		return ''
+		. ($condition ? '<!--[if ' . $condition . ']>' : '')
 		. HTML::script($js)
 		. ($condition ? '<![endif]-->' : '') . "\n";
 	}
