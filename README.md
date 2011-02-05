@@ -1,96 +1,50 @@
-Инструкция по использованию:
+##How To Use##
 
-1) типовой конфиг для production-версии
+# To add style or javascript in any place (Controller or View):
 
-	return array(
-		'js' => array(
-			//минимизация скриптов
-			'min' => true,
-			//сборка в один файл по типу (external, inline, onload)
-			'build' => true,
-		),
-		'css' => array(
-			//минимизация стилей
-			'min' => true,
-			//сборка в один файл по типу (external, inline, onload)
-			'build' => true,
-		),
-		'jqueryui' =>array(
-			'theme' =>'default'
-		),
-		'url'=>'/!/static/',
-		'cache'=>'/!/cache/',
+* Adding real existing files of styles on server or other host
 
-		/*
-		 * Для использования Coral CDN
-		 * добавьте в имени текущего домена со статикой суффикс ".nyud.net"
-		 * например для домена "google.com" установите хост "google.com.nyud.net"
-		 * Больше информации тут: http://habrahabr.ru/blogs/i_recommend/82739/
-		 * Пример заполнения:
-		 * 1) "" - ссылки будут иметь вид: "/pic.jpg"
-		 * 2) "http://ya.ru" - ссылки будут иметь вид: "http://ya.ru/pic.jpg"
-		 * 3) "http://ya.ru.nyud.net" - ссылки будут иметь вид: "http://ya.ru.nyud.net/pic.jpg"
-		 */
-		'host' => 'http://'.$_SERVER['HTTP_HOST'],
-	);
-
-2) В любом месте проекта (View, Controller) вставляем
-
-	//******************************************************************************
-	//вставка реально находящегося в корне сайта или на другом сервере файла стилей
-	//******************************************************************************
 	StaticCss::instance()->addCss('/css/admin.css');
 	StaticCss::instance()->addCss('http://jquickform.ru/cms/quickform.css');
-	//тоже самое, но с условием использования для определенного браузера
-	<!--[lte IE 7]><link rel="stylesheet" href="****.css" media="all" type="text/css" /><![endif]-->
-	StaticCss::instance()->addCss('http://jquickform.ru/cms/quickform.css','lte IE 7');
 
+** The same but with browser condition
 
-	//******************************************************************************
-	//вставка виртуального статического файла
-	// будет искаться в APPDIR.'static-files'.$file
-	// MODDIR.$module.'static-files'.$file
-	//******************************************************************************
+	// <!--[lte IE 7]><link rel="stylesheet" href="****.css" media="all" type="text/css" /><![endif]-->
+
+	StaticCss::instance()->addCss('http://jquickform.ru/cms/quickform.css', 'lte IE 7');
+
+* Adding virtual stylesheet file (will be searching in APPDIR.'static-files'.$file and MODDIR.$module.'static-files'.$file)
+
 	StaticCss::instance()->addCssStatic('style.css');
 
+* Inline styles adding
 
-	//******************************************************************************
-	//вставка инлайн стилей
-	//******************************************************************************
-	StaticCss::instance()->addCssInline('.a:hover{color:red}');
+ 	StaticCss::instance()->addCssInline('.a:hover{color:red}');
 
-	//******************************************************************************
-	//вставка реально существующих скриптов
-	//******************************************************************************
+* Adding real existing files of scripts on server or other host
+
 	StaticJs::instance()->addJs('/js/pirobox.js');
 	StaticJs::instance()->addJs('http://jquickform.ru/vendors/jQuickForm/quickform.js');
 
+* Adding virtual javascript file
 
-	//******************************************************************************
-	//вставка виртуального статического файла
-	//******************************************************************************
 	StaticJs::instance()->addJsStatic('jquery/jquery-1.4.3.min.js');
 
+* Inline scripts adding
 
-	//******************************************************************************
-	// упрощение вызова каких то стандартных библиотек и их плагинов
-	//******************************************************************************
-	StaticJs::instance()->needJquery();
-
-
-	//******************************************************************************
-	//вставка инлайн скриптов
-	//******************************************************************************
 	StaticJs::instance()->addJsInline('alert(\'test!\');');
 
+* Adding scrripts that must be executed on page load
 
-	//******************************************************************************
-	//вставка скриптов, которые должны выполниться при событии onload
-	//******************************************************************************
 	StaticJs::instance()->addJsOnload('
 		jQuery(".del_link").click(
 			function(){
-				alert("Русский текст!");
+				alert("Mes-mes-messsssage!");
 			}
 		);
 	','qweq');
+
+## To load all added javascripts or scripts
+
+	StaticJs::instance()->getJsAll();
+	StaticCss::instance()->getCssAll();
