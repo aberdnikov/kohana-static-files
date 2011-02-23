@@ -147,7 +147,7 @@ class Kohana_StaticJs extends StaticFile {
 		$js = trim($js, '/');
 		if (mb_substr($js, 0, 4) != 'http')
 		{
-			$js = $this->_config->host . $js;
+			$js = ($this->_config->host == '/') ? $js : $this->_config->host . $js;
 		}
 
 		return ''
