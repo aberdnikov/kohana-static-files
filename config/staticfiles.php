@@ -1,32 +1,38 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
+// Turn on the minimization and building in PRODUCTION environment
+$in_production = (Kohana::$environment === Kohana::PRODUCTION);
+
 return array(
     'js' => array(
 
         // scripts minimization
-        'min' => TRUE,
+        'min' => $in_production,
 
         // building all scripts in one file by types (external, inline, onload)
-        'build' => TRUE,
+        'build' => $in_production,
     ),
     'css' => array(
 
         // styles minimization
-        'min' => TRUE,
+        'min' => $in_production,
 
         // building all styles in one file by types (external, inline)
-        'build' => TRUE,
+        'build' => $in_production,
     ),
 
     // Full path to site DOCROOT
     'path' => realpath(DOCROOT) . DIRECTORY_SEPARATOR,
 
     // Path to copy static files that are not build in one file
-    'url' => '/!/static/',
+    'url' => '/media/static/',
 
     // Path to styles and scripts builds
-    'cache' => '/!/cache/',
+    'cache' => '/media/cache/',
 
     // Host address (base or CDN)
     'host' => URL::base(FALSE, TRUE),
+
+	// Cache reset interval
+	'cache_reset_interval' => 12*60*60, // 12 hours
 );

@@ -65,7 +65,7 @@ class Kohana_StaticJs extends StaticFile {
 	 */
 	public function addJs($js, $condition = NULL)
 	{
-		$this->_js[$js] = $condition;
+		$this->_js[$condition][$js] = $condition;
 		return $this;
 	}
 
@@ -79,7 +79,7 @@ class Kohana_StaticJs extends StaticFile {
 	public function addJsStatic($js, $condition = NULL)
 	{
 		$js = $this->_config->url . $js;
-		$this->_js[$js] = $condition;
+		$this->_js[$condition][$js] = $condition;
 		return $this;
 	}
 
@@ -175,24 +175,37 @@ class Kohana_StaticJs extends StaticFile {
 		if ( ! $this->_config->js['build'])
 		{
 			$js_code = '';
-			foreach ($this->_js as $js => $condition)
+			foreach ($this->_js as $condition => $js_array)
 			{
-				$js_code .= $this->getLink($js, $condition) . "\n";
+				foreach($js_array as $js => $condition)
+				{
+					$js_code .= $this->getLink($js, $condition) . "\n";
+				}
 			}
 			return $js_code;
 		}
 		else
 		{
 			$build = array();
-            foreach ($this->_js as $js => $condition)
-            {
-                $build[$condition][] = $js;
-            }
+            foreach ($this->_js as $condition => $js_array)
+			{
+				foreach($js_array as $js => $condition)
+                {
+                    $build[$condition][] = $js;
+                }
+			}
 
 			$js_code = '';
             foreach ($build as $condition => $js)
             {
                 $build_name = $this->makeFileName($js, $condition, 'js');
+
+	            // Clearing cache if expire time is gone
+				if(file_exists($build_name)
+				   AND (filemtime($this->cache_file($build_name)) + $this->_config->cache_reset_interval) < time())
+				{
+					$this->_cache_reset();
+				}
 
                 if ( ! file_exists($this->cache_file($build_name)))
                 {

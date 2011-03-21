@@ -53,7 +53,7 @@ class Kohana_StaticCss extends StaticFile {
 	 */
 	public function addCss($css_file, $condition = NULL)
 	{
-		$this->_css[$css_file] = $condition;
+		$this->_css[$condition][$css_file] = $condition;
 		return $this;
 	}
 
@@ -67,7 +67,7 @@ class Kohana_StaticCss extends StaticFile {
 	public function addCssStatic($css_file, $condition = NULL)
 	{
 		$css_file = $this->_config->url . $css_file;
-		$this->_css[$css_file] = $condition;
+		$this->_css[$condition][$css_file] = $condition;
 		return $this;
 	}
 
@@ -171,26 +171,40 @@ class Kohana_StaticCss extends StaticFile {
 		// Not need to build one js file
 		if ( ! $this->_config->css['build'])
 		{
-			foreach ($this->_css as $css => $condition)
+			foreach ($this->_css as $condition => $css_array)
 			{
-				$css_code .= $this->getLink($css, $condition);
+				foreach($css_array as $css => $condition)
+				{
+					$css_code .= $this->getLink($css, $condition);
+				}
 			}
 		}
 		else
 		{
 			$build = array();
 			$css_code = '';
-			foreach ($this->_css as $css => $condition)
+			foreach ($this->_css as $condition => $css_array)
 			{
-				$build[$condition][] = $css;
+				foreach($css_array as $css => $condition)
+				{
+					$build[$condition][] = $css;
+				}
 			}
 
 			foreach ($build as $condition => $css)
 			{
 				$build_name = $this->makeFileName($css, $condition, 'css');
+
+				// Clearing cache if expire time is gone
+				if(file_exists($build_name)
+				   AND (filemtime($this->cache_file($build_name)) + $this->_config->cache_reset_interval) < time())
+				{
+					$this->_cache_reset();
+				}
+
 				if ( ! file_exists($this->cache_file($build_name)))
 				{
-					 // first time building
+					// first time building
 					$build = '';
 					foreach ($css as $url)
 					{

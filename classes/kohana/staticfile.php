@@ -90,7 +90,6 @@ class Kohana_StaticFile {
 				// ie '/css/style.css'
 				$orig = realpath(DOCROOT) . preg_replace('/\//', DIRECTORY_SEPARATOR, $url);
 			}
-
 			return file_get_contents($orig);
 		}
 	}
@@ -143,6 +142,22 @@ class Kohana_StaticFile {
 			 . substr($file_name, 0, 1) . '/'
 			 . substr($file_name, 1, 1) . '/'
 			 . $file_name . '.' . $type;
+	}
+
+	/**
+	 * Clearing cache folders
+	 *
+	 * @return void
+	 */
+	protected function _cache_reset()
+	{
+		$cache_paths = array($this->_config->cache, $this->_config->url);
+
+		foreach($cache_paths as $path)
+		{
+			$path = DOCROOT . trim(preg_replace('/\//', DIRECTORY_SEPARATOR, $path), '\\');
+			File::rmdir($path, TRUE);
+		}
 	}
 
 } // END Kohana_StaticFile
