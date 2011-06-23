@@ -1,37 +1,38 @@
-<?php
+<?php defined('SYSPATH') or die('No direct script access.');
+
+// Turn on the minimization and building in PRODUCTION environment
+$in_production = (Kohana::$environment === Kohana::PRODUCTION);
 
 return array(
     'js' => array(
-        //минимизация скриптов
-        'min' => true,
-        //сборка в один файл по типу (external, inline, onload)
-        'build' => true,
+
+        // scripts minimization
+        'min' => $in_production,
+
+        // building all scripts in one file by types (external, inline, onload)
+        'build' => $in_production,
     ),
     'css' => array(
-        //минимизация стилей
-        'min' => true,
-        //сборка в один файл по типу (external, inline)
-        'build' => true,
+
+        // styles minimization
+        'min' => $in_production,
+
+        // building all styles in one file by types (external, inline)
+        'build' => $in_production,
     ),
-    //полный путь до DOCUMENT_ROOT домена со статикой
-    //(естественно он должен находиться на том же физическом сервере,
-    // что и сам сайт)
-    // например так: 
-    'path' => realpath(DOCROOT),
-    //сюда будут копироваться статические файлы если не требуется их сборка в билды
-    'url' => '/!/static/',
-    //сюда будут складываться сгенерированные скрипты и файлы стилей
-    'cache' => '/!/cache/',
-    /*
-     * Для использования Coral CDN
-     * добавьте в имени текущего домена со статикой суффикс ".nyud.net"
-     * например для домена "google.com" установите хост "google.com.nyud.net"
-     * Больше информации тут: http://habrahabr.ru/blogs/i_recommend/82739/
-     * Пример заполнения:
-     * 1) "" - ссылки будут иметь вид: "/pic.jpg"
-     * 2) "http://ya.ru" - ссылки будут иметь вид: "http://ya.ru/pic.jpg"
-     * 3) "http://ya.ru.nyud.net" - ссылки будут иметь вид: "http://ya.ru.nyud.net/pic.jpg"
-     */
-    'host' => 'http://'.$_SERVER['HTTP_HOST'],
+
+    // Full path to site DOCROOT
+    'path' => realpath(DOCROOT) . DIRECTORY_SEPARATOR,
+
+    // Path to copy static files that are not build in one file
+    'url' => '/media/static/',
+
+    // Path to styles and scripts builds
+    'cache' => '/media/cache/',
+
+    // Host address (base or CDN)
+    'host' => URL::base(FALSE, TRUE),
+
+	// Cache reset interval
+	'cache_reset_interval' => 12*60*60, // 12 hours
 );
-?>
