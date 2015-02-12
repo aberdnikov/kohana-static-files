@@ -43,6 +43,12 @@ class Kohana_StaticFile {
 		fwrite($f, $data);
 
 		fclose($f);
+
+		// Create gzipped file
+		$gz_file = $file . '.gz';
+		$fp = gzopen ($gz_file, 'w9');
+		gzwrite ($fp, file_get_contents($file));
+		gzclose($fp);
 	}
 
 	/**

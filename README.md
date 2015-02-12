@@ -44,6 +44,8 @@
             'qweq'
         );
 
+* Also creates gzipped static file for some hostings who not allow compress static files using apache
+
 ## To load all added javascripts or scripts
 
         StaticJs::instance()->getJsAll();
